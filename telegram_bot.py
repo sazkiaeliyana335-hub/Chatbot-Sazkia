@@ -1,41 +1,117 @@
-# -- coding: utf-8 --
+import logging
+import os
+import json
 from telegram import Update
-from telegram.ext import (
-    ApplicationBuilder,
-    CommandHandler,
-    MessageHandler,
-    ContextTypes,
-    filters
+from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
+
+from core import get_bot_reply                                                                                                                            
+from langchain_groq import ChatGroq
+from langchain_core.prompts import ChatPromptTemplate
+
+# =============================
+# LOGGING
+# =============================
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+
+# =============================
+# ENVIRONMENT VARIABLES
+# =============================
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+if not TOKEN:
+    print("❌ TELEGRAM_BOT_TOKEN belum diset")
+    exit()
+if not GROQ_API_KEY:
+    print("❌ GROQ_API_KEY belum diset")
+    exit()
+
+os.environ["GROQ_API_KEY"] = GROQ_API_KEY
+
+# =============================
+# INISIALISASI GROQ AI
+# =============================
+llm = ChatGroq(
+    model_name="llama-3.1-8b-instant",
+    temperature=0.3
 )
 
-from core import get_bot_reply
+# =============================
+# MEMORY SINGKAT PER CHAT
+# =============================
+conversation_history = {}  # {chat_id: [{"user": msg, "bot": msg}, ...]}
 
-TOKEN = "8259950565:AAFHOS64YprzALSOmnScaa8CDfwhW0NWSR4"
-
+# =============================
+# COMMAND /START
+# =============================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    conversation_history[chat_id] = []  # reset history
     await update.message.reply_text(
-        "Halo 👋\n"
-        "Saya bot Sazkia Printing.\n\n"
-        "Silakan tanya seputar:\n"
-        "- Jam operasional\n"
-        "- Alamat toko\n"
-        "- Cara order\n"
-        "- Produk yang tersedia"
+        "Halo 👋 Saya Chatbot Sazkia Printing 🖨️\nSilakan ketik pertanyaanmu atau ingin memesan jasa printing 😊"
     )
 
-async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+# =============================
+# HANDLE PESAN USER
+# =============================
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
     user_text = update.message.text
-    jawaban = get_bot_reply(user_text)
-    await update.message.reply_text(jawaban)
 
-def main():
+    if chat_id not in conversation_history:
+        conversation_history[chat_id] = []
+
+    # 1️⃣ Jawab dari core.py
+    reply = get_bot_reply(user_text)
+
+    # 2️⃣ Jika core.py tidak paham → lempar ke Groq AI
+    if "belum memahami" in reply.lower() or "tidak tahu" in reply.lower():
+        try:
+            # Ambil 3 history terakhir untuk konteks
+            history_text = ""
+            for h in conversation_history[chat_id][-3:]:
+                history_text += f"User: {h['user']}\nBot: {h['bot']}\n"
+
+            prompt = ChatPromptTemplate.from_messages([
+                (
+                    "system",
+                    """
+Kamu adalah admin Sazkia Printing. Tugasmu:
+1. Tangkap produk/jasa, jumlah, alamat, dan nomor telepon jika user ingin memesan.
+2. Jika informasi kurang lengkap, tanyakan secara singkat dan ramah.
+3. Jika user bertanya tentang layanan atau jam buka, jawab sesuai topik.
+4. Gunakan bahasa WhatsApp, ramah, singkat, jelas.
+5. Jangan mengulang jawaban default jika user sudah menyebut produk atau jumlah.
+6. Fokus hanya pada Sazkia Printing.
+"""
+                ),
+                ("human", "{history}\nUser: {input}")
+            ])
+            chain = prompt | llm
+            ai_response = chain.invoke({"input": user_text, "history": history_text})
+            reply = ai_response.content
+
+        except Exception as e:
+            logging.error("Groq AI Error: %s", e)
+            reply = "Maaf kak 🙏 sistem sedang sibuk. Bisa ditanyakan lagi sebentar ya 😊"
+
+    # simpan history
+    conversation_history[chat_id].append({"user": user_text, "bot": reply})
+
+    await update.message.reply_text(reply)
+
+# =============================
+# MAIN PROGRAM
+# =============================
+if __name__ == '__main__':
+    print("🤖 Bot Sazkia Printing sedang dijalankan...")
+
     app = ApplicationBuilder().token(TOKEN).build()
-
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
+    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
 
-    print("🤖 Bot Telegram Sazkia Printing sedang berjalan...")
     app.run_polling()
-
-if __name__ == "__main__":
-    main()
