@@ -1,0 +1,23 @@
+[
+  {
+    "tag": "jam_operasional",
+    "keywords": ["jam buka", "jam operasional", "buka jam berapa", "sampai jam berapa", "tutup jam berapa"],
+    "answer": "Toko Sazkia Printing buka setiap hari dari jam 08.00 sampai jam 22.00 WIB."
+  },
+  {
+    "tag": "alamat",
+    "keywords": ["alamat", "lokasi", "di mana", "dimana", "maps", "Kramat"],
+    "answer": "Alamat Sazkia Printing: Kramat, Kabuptaen Tegal, Jawa Tengah."
+  },
+  {
+    "tag": "cara_order",
+    "keywords": ["cara order", "cara pesan", "beli bagaimana", "order dimana", "order lewat apa", "pesan lewat apa"],
+    "answer": "Cara order di Sazkia Printing:\n• Tokopedia\n• Shopee\n• WhatsApp: 087807032270\n• Datang langsung ke alamat kami di Kramat, Kabupaten Tegal."
+  },
+  {
+    "tag": "produk",
+    "keywords": ["jual apa saja", "produk apa saja", "barang apa saja", "komputer", "laptop", "aksesoris", "jaringan"],
+    "answer": "Sazkia Printing menyediakan jasa printing & digital print, print BW & color, scan,laminatin,jilid,banner & spanduk."
+  }
+]
+
