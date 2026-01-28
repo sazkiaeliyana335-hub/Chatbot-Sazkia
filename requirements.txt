@@ -1,7 +1,4 @@
 flask
-groq
-langchain_core
-langchain_groq
 python-dotenv
 python-telegram-bot
 request
