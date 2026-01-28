@@ -15,21 +15,21 @@ def get_bot_reply(text: str) -> str:
 
     if match("jam"):
         return (
-            "🕘 *Jam Operasional*\n"
+            "🕘 Jam Operasional\n"
             "Senin – Sabtu\n"
             "08.00 – 20.00 WIB"
         )
 
     elif match("alamat"):
         return (
-            "📍 *Alamat Toko*\n"
+            "📍 Alamat Toko\n"
             "Sazkia Printing\n"
             "Jl. Melati Desa Kramat"
         )
 
     elif match("order"):
         return (
-            "📝 *Cara Order*\n"
+            "📝 Cara Order\n"
             "1️⃣ Kirim desain\n"
             "2️⃣ Pilih ukuran & bahan\n"
             "3️⃣ Konfirmasi harga\n"
@@ -38,7 +38,7 @@ def get_bot_reply(text: str) -> str:
 
     elif match("produk"):
         return (
-            "🖨️ *Produk & Layanan*\n"
+            "🖨️ Produk & Layanan\n"
             "• Banner\n"
             "• Brosur\n"
             "• Undangan\n"
@@ -51,3 +51,7 @@ def get_bot_reply(text: str) -> str:
             "😊 Maaf, saya belum paham.\n\n"
             "Silakan tanya tentang:\n"
             "• Jam operasional\n"
+            "• Alamat toko\n"
+            "• Cara order\n"
+            "• Produk yang tersedia"
+        )

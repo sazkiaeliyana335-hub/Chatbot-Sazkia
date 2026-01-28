@@ -15,5 +15,4 @@ def chat():
     return jsonify({"reply": reply})
 
 if __name__ == "__main__":
-    # debug=True supaya mudah melihat error saat pengembangan
     app.run(debug=True)
