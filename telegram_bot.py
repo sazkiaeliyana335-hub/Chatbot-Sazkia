@@ -4,6 +4,7 @@ import json
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
 
+from dotenv import load_dotenv
 from core import get_bot_reply                                                                                                                            
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
@@ -20,6 +21,7 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 # =============================
 # ENVIRONMENT VARIABLES
 # =============================
+load_dotenv()
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
