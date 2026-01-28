@@ -1,5 +1,4 @@
 # -- coding: utf-8 --
-from fuzzywuzzy import fuzz
 
 def get_bot_reply(text: str) -> str:
     text = text.lower().strip()
@@ -12,7 +11,7 @@ def get_bot_reply(text: str) -> str:
     }
 
     def match(key):
-        return any(fuzz.partial_ratio(text, k) > 75 for k in keywords[key])
+        return any(k in text for k in keywords[key])
 
     if match("jam"):
         return (
@@ -25,7 +24,7 @@ def get_bot_reply(text: str) -> str:
         return (
             "📍 *Alamat Toko*\n"
             "Sazkia Printing\n"
-            "Jl. Melati desa Kramat"
+            "Jl. Melati Desa Kramat"
         )
 
     elif match("order"):
@@ -52,7 +51,3 @@ def get_bot_reply(text: str) -> str:
             "😊 Maaf, saya belum paham.\n\n"
             "Silakan tanya tentang:\n"
             "• Jam operasional\n"
-            "• Alamat toko\n"
-            "• Cara order\n"
-            "• Produk yang tersedia"
-        )
