@@ -2,7 +2,9 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asisten Virtual - Sazkia Printing</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,6 +14,7 @@
         }
         h2 {
             text-align: center;
+            margin-bottom: 16px;
         }
         #chat-box {
             background: white;
@@ -33,12 +36,15 @@
             padding: 8px 12px;
             border-radius: 16px;
             display: inline-block;
+            max-width: 80%;
         }
         .bot span {
-            background: #4462ad;
+            background: #e0e0e0;
+            color: #000;
             padding: 8px 12px;
             border-radius: 16px;
             display: inline-block;
+            max-width: 80%;
         }
         #input-area {
             margin-top: 12px;
@@ -47,24 +53,37 @@
         }
         #message {
             flex: 1;
-            padding: 8px;
+            padding: 10px;
             border-radius: 8px;
             border: 1px solid #ccc;
+            font-size: 14px;
         }
         button {
-            padding: 8px 16px;
+            padding: 10px 16px;
             border-radius: 8px;
             border: none;
             cursor: pointer;
+            background: #2580d6;
+            color: white;
+        }
+        button:hover {
+            background: #1b63a8;
         }
     </style>
 </head>
+
 <body>
     <h2>Asisten Virtual - Sazkia Printing</h2>
+
     <div id="chat-box"></div>
 
     <div id="input-area">
-        <input type="text" id="message" placeholder="Tulis pertanyaan tentang Sazkia Printing..." />
+        <input
+            type="text"
+            id="message"
+            placeholder="Tulis pertanyaan tentang Sazkia Printing..."
+            autocomplete="off"
+        />
         <button onclick="sendMessage()">Kirim</button>
     </div>
 
@@ -72,10 +91,16 @@
         const chatBox = document.getElementById("chat-box");
         const input = document.getElementById("message");
 
+        function escapeHTML(text) {
+            const div = document.createElement("div");
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         function addMessage(text, sender) {
             const div = document.createElement("div");
             div.className = "msg " + sender;
-            div.innerHTML = `<span>${text.replace(/\n/g, "<br>")}</span>`;
+            div.innerHTML = `<span>${escapeHTML(text).replace(/\n/g, "<br>")}</span>`;
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
@@ -87,14 +112,18 @@
             addMessage(text, "user");
             input.value = "";
 
-            const response = await fetch("/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: text })
-            });
+            try {
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: text })
+                });
 
-            const data = await response.json();
-            addMessage(data.reply, "bot");
+                const data = await response.json();
+                addMessage(data.reply || "Maaf, terjadi kesalahan 🙏", "bot");
+            } catch (error) {
+                addMessage("Tidak bisa terhubung ke server 😥", "bot");
+            }
         }
 
         // Enter = kirim
@@ -104,8 +133,8 @@
 
         // Pesan pembuka
         addMessage(
-            "Halo, saya asisten virtual Sazkia Printing 👋<br>" +
-            "Silakan tanya: jam buka, alamat, cara order, atau produk yang tersedia.",
+            "Halo 👋 Saya asisten virtual Sazkia Printing.\n" +
+            "Silakan tanya tentang jam buka, alamat, cara order, atau produk yang tersedia.",
             "bot"
         );
     </script>
